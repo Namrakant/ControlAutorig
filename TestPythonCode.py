@@ -1,0 +1,1 @@
+print("Hello world! I just finished my struggle with git push command because git credential manager was not asking me the new account's username password. Even though I had added git config --global local and normal settings")
