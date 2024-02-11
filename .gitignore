@@ -1,0 +1,8 @@
+# ignore this file
+Maya.bat
+TestPull.txt
+TestPythonCode.py
+
+#ignore all .pyc and .log files
+*.pyc
+*.log
