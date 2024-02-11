@@ -18,6 +18,6 @@ print("This is a control autorigger")
 #---------------------------------------------------------------------------------#
 def testFunction():
     """
-    Test Function
+    Test Function: This can have the basic building blocks of the Autorig
     """
     print("This is a test function")
