@@ -14,11 +14,13 @@ You have a character rig that has properly named joints skinned to the mesh but 
 - Good **joint placements/orientation** and you want to keep that!
 - Great **skinning** and you do not want any changes to happen there.
 - Nice **naming convention** for joints.
+
+
 **BUT-**
 - **NO CONTROLLERS**; just the joints to animate.
 
 ## **You might want this tool so that you can...** 
-- Easily create controllers for the joints without changing the joint placement/orientation/skinning
+- **Easily create color-coded controllers** for the joints without changing the joint placement/orientation/skinning
 - Have controllers named according to your joint **naming convention**
 
 ## Environment [in development]
