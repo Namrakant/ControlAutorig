@@ -5,21 +5,21 @@ The Control AutoRig tool is created for Autodesk Maya which simplifies the creat
 You have a character rig that has properly named joints skinned to the mesh but no controls. Example- [mixamo rigs](https://www.mixamo.com/#/)
 
 ## **Are you?**
-1. A small 3D animation studio
-2. An indie game development studio
-3. A 3D animator who wishes to create short animations
-4. A student trying to learn 3D animation and you have basic rigging skills
+- A small 3D animation studio
+- An indie game development studio
+- A 3D animator who wishes to create short animations
+- A student trying to learn 3D animation and you have basic rigging skills
 
 ## **Are you using a free character rig for your 3D animation? And it has-**
--Good **joint placements/orientation** and you want to keep that!
--Great **skinning** and you do not want any changes to happen there.
--Nice **naming convention** for joints.
+- Good **joint placements/orientation** and you want to keep that!
+- Great **skinning** and you do not want any changes to happen there.
+- Nice **naming convention** for joints.
 **BUT-**
--***NO CONTROLLERS**; just the joints to animate.
+- **NO CONTROLLERS**; just the joints to animate.
 
 ## **You might want this tool so that you can...** 
--Easily create controllers for the joints without changing the joint placement/orientation/skinning
--Have controllers named according to your joint **naming convention**
+- Easily create controllers for the joints without changing the joint placement/orientation/skinning
+- Have controllers named according to your joint **naming convention**
 
 ## Environment [in development]
 - [x] **OS**      : Windows
@@ -33,12 +33,12 @@ You have a character rig that has properly named joints skinned to the mesh but 
 - [x] Color-coded controllers
 
 ## **Features under progress...**
--IK controls
--FK-IK switch
--Control color options
--Control shape options
--Control size manipulator
--Animation transfer from a mixamo rig to the controls
+- IK controls
+- FK-IK switch
+- Control color options
+- Control shape options
+- Control size manipulator
+- Animation transfer from a mixamo rig to the controls
 
 ## **LICENSE**
 Control Autorig is available under the MIT License. You can use it for commercial or non-commercial projects. Be sure to credit me in the project and documentation.
