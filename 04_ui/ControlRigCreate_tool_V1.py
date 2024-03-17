@@ -13,25 +13,16 @@
 #---------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------#
 
-import os
-import sys
 import maya.cmds as mc
-# import maya.mel as mel
-# from functools import partial
 import maya.OpenMayaUI as omui
 
-from PySide2 import QtUiTools
-from PySide2 import QtCore, QtGui
-from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 from Qt import QtWidgets, QtGui, QtCore, QtCompat
 
-
-# import ui.ControlAutorig
 # VARIABLE
 TITLE = 'ControlAutorig'#os.path.splitext(os.path.basename(__file__))[0]
-print("Title = ", TITLE)
+
 #---------------------------------------------------------------------------------#
 # Function to keep the User Interface on top of Maya
 #---------------------------------------------------------------------------------#
@@ -40,34 +31,27 @@ def maya_main_window():
     Return the Maya main window widget as a Python object
     """
     main_window_ptr = omui.MQtUtil.mainWindow()
-    return wrapInstance(int(main_window_ptr), QtWidgets.QMainWindow)#QWidget)
+    return wrapInstance(int(main_window_ptr), QtWidgets.QMainWindow)
+
 main_window = maya_main_window()
+
 #---------------------------------------------------------------------------------#
 # Class to create control autorig UI
 #---------------------------------------------------------------------------------#
 class ControlAutorig(QtWidgets.QDialog):
     def __init__(self):
         super(ControlAutorig, self).__init__(main_window)
-        # # UI always stays on top
-        # QtWidgets.QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
-        # self.setWindowFlags(QtCore.Qt.Window)
-        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        print("Hello")
         path_ui = 'D:/ControlAutorig/04_ui/ui/ControlAutorig.ui'#("/").join([os.path.dirname(__file__), "ui", TITLE + ".ui"])
-        print('path ui = ', path_ui)
+
         # LOAD ui with absolute path
-        # self.wgUtil = QtCompat.loadUi(path_ui)
-        self.wgUtil = QtUiTools.QUiLoader().load(path_ui)
+        self.wgUtil = QtCompat.loadUi(path_ui)
+        # self.wgUtil = QtUiTools.QUiLoader().load(path_ui)
         self.wgUtil.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        # self.wgUtil.setWindowTitle("Control Autorig")
-        # QtWidgets.QMainWindow.__init__(self, parent, QtCore.Qt.WindowStaysOnTopHint)
 
         # SHOW the UI
         self.wgUtil.show()
 
         self.create_connections()
-
-
 
 #------------------------------- CREATE CONNECTIONS METHOD --------------------------#
     def create_connections(self):
@@ -151,18 +135,18 @@ class ControlAutorig(QtWidgets.QDialog):
         """
         Creating the controller and its offset group, coloring it based on its name, changing the shape based on the input
         Attr:
-            prefix      : str, prefix to name new objects
+            prefix      : str,   prefix to name new objects
             scale       : float, general scale of the rig
-            translateTo : str, reference object for control position
-            rotateTo    : str, reference object for control orientation
-            parent      : str, object to be parent of new control
-            shape       : str, controller shape type
+            translateTo : str,   reference object for control position
+            rotateTo    : str,   reference object for control orientation
+            parent      : str,   object to be parent of new control
+            shape       : str,   controller shape type
             lockChannels: list(str), list of channels on control to be locked and non-keyable
-            jnt         : str, joint name to be used to identify its parent
+            jnt         : str,   joint name to be used to identify its parent
         """
         # creating the shape of the NURBS controls and parenting under the offset group
 
-        ctrlObject = None
+        ctrlObject   = None
         circleNormal = [1,0,0]
 
         if shape in ['circle', 'circleX']:
@@ -228,7 +212,6 @@ class ControlAutorig(QtWidgets.QDialog):
             
         for at in singleAttributeLockList:
             mc.setAttr( ctrlObject + '.' + at, l = 1, k = 0) # l = lock, k = keyable
-        
 
         return ctrlObject, ctrlOffset
 
@@ -241,10 +224,8 @@ class ControlAutorig(QtWidgets.QDialog):
         print(jnt, parents, len(parents))
         if parents != [] and len(parents) > 2:
             parents.reverse()
-            # print(jnt, parents[1])
             return parents[1]
         else:
-            # print(jnt, parents[0])
             return parents[0]
 
     def parent_constraint_control_to_jnt(self, ctrl_name, jnt):
