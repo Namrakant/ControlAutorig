@@ -189,7 +189,7 @@ color:rgb(255,255,255);
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEditShoulderJoint">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="styleSheet">
          <string notr="true">#lineEditShoulderJoint[text=&quot;&quot;]{
@@ -203,7 +203,7 @@ color:rgb(255,255,255);
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEditRootJoint">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="styleSheet">
          <string notr="true">#lineEditRootJoint[text=&quot;&quot;]{
@@ -240,7 +240,7 @@ color:rgb(255,255,255);
       <item row="2" column="1">
        <widget class="QLineEdit" name="lineEditUpperLegJoint">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="styleSheet">
          <string notr="true">#lineEditUpperLegJoint[text=&quot;&quot;]{

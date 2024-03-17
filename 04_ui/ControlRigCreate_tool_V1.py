@@ -13,48 +13,29 @@
 #---------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------#
 
-import maya.cmds as mc
-import maya.OpenMayaUI as omui
+import os
+# import maya.cmds as mc          # ModuleNotFoundError: No module named 'maya' if run on OS. Moved inside main call.
 
-from shiboken2 import wrapInstance
-
+from Qt.QtWidgets import QMessageBox
 from Qt import QtWidgets, QtGui, QtCore, QtCompat
 
-# VARIABLE
-TITLE = 'ControlAutorig'#os.path.splitext(os.path.basename(__file__))[0]
-
 #---------------------------------------------------------------------------------#
-# Function to keep the User Interface on top of Maya
-#---------------------------------------------------------------------------------#
-def maya_main_window():
-    """
-    Return the Maya main window widget as a Python object
-    """
-    main_window_ptr = omui.MQtUtil.mainWindow()
-    return wrapInstance(int(main_window_ptr), QtWidgets.QMainWindow)
-
-main_window = maya_main_window()
-
-#---------------------------------------------------------------------------------#
-# Class to create control autorig UI
+# Class to create control autorig UI by loading the ControlAutorig.ui File
 #---------------------------------------------------------------------------------#
 class ControlAutorig(QtWidgets.QDialog):
     def __init__(self):
-        super(ControlAutorig, self).__init__(main_window)
-        path_ui = 'D:/ControlAutorig/04_ui/ui/ControlAutorig.ui'#("/").join([os.path.dirname(__file__), "ui", TITLE + ".ui"])
-
         # LOAD ui with absolute path
         self.wgUtil = QtCompat.loadUi(path_ui)
-        # self.wgUtil = QtUiTools.QUiLoader().load(path_ui)
+        
+        # UI always stays on top. Issue: Need to move it sometimes to see the warning/error dialog box.
         self.wgUtil.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         # SHOW the UI
         self.wgUtil.show()
 
-        self.create_connections()
+        self.createConnections()
 
-#------------------------------- CREATE CONNECTIONS METHOD --------------------------#
-    def create_connections(self):
+    def createConnections(self):
         """
         This method connects the buttons to its respective methods
         """
@@ -67,64 +48,61 @@ class ControlAutorig(QtWidgets.QDialog):
         self.wgUtil.btnCreateControls.clicked.connect(self.createControlsMethod)
 
     def identifyPrefixMethod(self):
-        self.prefix = mc.ls(sl=1)[0].split("_")[0]
+        try:
+            self.prefix = mc.ls(sl=1)[0].split("_")[0]
+        except:
+            QMessageBox.critical(None, 'Critical', 'Please select the root joint')
 
     def rootJointMethod(self): # used in Connection
-        self.identifyPrefixMethod()
         self.rootJointName = mc.ls(sl=True, type='joint') # Do a check if any other joint exist above it or not
         print(self.rootJointName)
         if self.rootJointName != []:
             self.wgUtil.lineEditRootJoint.setText(self.rootJointName[0])
-            print(type(self.rootJointName), self.rootJointName)
         else:
-            print("Please select root joint")
+            QMessageBox.warning(None, 'Warning', 'Please select root joint')
     
     def hipJointMethod(self): # used in Connection
-        self.identifyPrefixMethod()
         self.hipJointName = mc.ls(sl=True, type='joint') # Do a check if any other joint exist above it or not
         print(self.hipJointName)
         if self.hipJointName != []:
             self.wgUtil.lineEditUpperLegJoint.setText(self.hipJointName[0])
-            print(type(self.hipJointName), self.hipJointName)
         else:
-            print("Please select hip joint")
+            QMessageBox.warning(None, 'Warning', 'Please select upper leg joint')
     
     def shoulderJointMethod(self): # used in Connection
-        self.identifyPrefixMethod()
         self.shoulderJointName = mc.ls(sl=True, type='joint') # Do a check if any other joint exist above it or not
         print(self.shoulderJointName)
         if self.shoulderJointName != []:
             self.wgUtil.lineEditShoulderJoint.setText(self.shoulderJointName[0])
-            print(type(self.shoulderJointName), self.shoulderJointName)
         else:
-            print("Please select shoulder joint")
+            QMessageBox.warning(None, 'Warning', 'Please select shoulder joint')
     
     #-------------------- Create FK Controls Method ---------------------------#
     def createControlsMethod(self): # used in Connection
         
         self.identifyPrefixMethod()
-        # select joints
-        selected_joints = mc.ls(sl=True, type='joint')
-        # print(selected_joints)
 
-        for jnt in selected_joints:
+        # select all joints. Root joint should be the first joint
+        selected_root_joint = mc.ls(sl=True, type='joint')
+
+        for jnt in selected_root_joint:
             # get the name for control
             ctrl_name_prefix = jnt.split(self.prefix)[-1]
 
-            ctrl_name, ctrlOffsetName = self.create_controls( prefix=ctrl_name_prefix, scale=20.0, 
+            ctrl_name, ctrlOffsetName = self.createControls( prefix=ctrl_name_prefix, scale=20.0, 
                             translateTo=jnt, rotateTo=jnt, 
                             parent="", shape='circleY', lockChannels=[])
             
             # find the parent and parent the offset control to its parent control similar to joint hierarchy
-            parent_of_jnt = self.find_parent(jnt)
+            parent_of_jnt = self.findParent(jnt)
 
             # parent respective controllers hierarchy, similar to joint hierarchy
-            self.controller_hierarchy(parent_of_jnt, ctrlOffsetName)    
+            self.controllerHierarchy(parent_of_jnt, ctrlOffsetName)    
             
             # parent constraint the controllers to respective joint
-            self.parent_constraint_control_to_jnt(ctrl_name, jnt)
+            self.parentConstraintControlToJnt(ctrl_name, jnt)
 
-    def create_controls(self, prefix = 'new',   # Create a new class for this
+    def createControls(self, prefix = 'new',   # Create a new class for this in future
                     scale = 1.0, 
                     translateTo = '',
                     rotateTo = '',
@@ -133,7 +111,7 @@ class ControlAutorig(QtWidgets.QDialog):
                     lockChannels = ['s','v'],
                     jnt = ''):    
         """
-        Creating the controller and its offset group, coloring it based on its name, changing the shape based on the input
+        Creates the controller and its offset group, coloring it based on its name, changing the shape based on the input
         Attr:
             prefix      : str,   prefix to name new objects
             scale       : float, general scale of the rig
@@ -144,10 +122,10 @@ class ControlAutorig(QtWidgets.QDialog):
             lockChannels: list(str), list of channels on control to be locked and non-keyable
             jnt         : str,   joint name to be used to identify its parent
         """
-        # creating the shape of the NURBS controls and parenting under the offset group
-
+        # creates the shape of the NURBS controls and parenting under the offset group
         ctrlObject   = None
         circleNormal = [1,0,0]
+        # prefix = self.prefix
 
         if shape in ['circle', 'circleX']:
             circleNormal = [1,0,0]
@@ -156,35 +134,34 @@ class ControlAutorig(QtWidgets.QDialog):
         elif shape == 'circleZ':
             circleNormal = [0,0,1]
         elif shape == 'sphere':
-            ctrlObject = mc.circle( n = prefix + '_ctrl', ch = False, normal = [1,0,0], radius = scale )[0]
-            addShape = mc.circle( n = prefix + '_ctrl', ch = False, normal = [0,0,1], radius = scale )[0]
-            mc.parent( mc.listRelatives( addShape, s = 1 ), ctrlObject, r = 1, s = 1 )
+            ctrlObject = mc.circle( name =  prefix + '_ctrl', constructionHistory = False, normal = [1,0,0], radius = scale )[0]
+            addShape   = mc.circle( name =  prefix + '_ctrl', constructionHistory = False, normal = [0,0,1], radius = scale )[0]
+            mc.parent( mc.listRelatives( addShape, shapes = True ), ctrlObject, relative = True, shape = True )
             mc.delete( addShape )
 
         if not ctrlObject:
 
-            ctrlObject = mc.circle( n = prefix + '_ctrl', ch = False, normal = circleNormal, radius = scale )[0] #ch = channel history
+            ctrlObject = mc.circle( name =  prefix + '_Ctrl', constructionHistory = False, normal = circleNormal, radius = scale )[0] #ch = channel history
 
-        ctrlZero = mc.group( n = prefix + '_Zero_grp', em = 1 )
+        ctrlZero   = mc.group( name = prefix + '_Zero_grp',   empty = 1 )
         mc.parent( ctrlObject, ctrlZero )
-        ctrlOffset = mc.group( n = prefix + '_Offset_grp', em = 1 )
+        ctrlOffset = mc.group( name = prefix + '_Offset_grp', empty = 1 )
         mc.parent( ctrlZero, ctrlOffset )
 
         # color control
+        ctrlShapes = mc.listRelatives( ctrlObject, shapes = True) 
+        [ mc.setAttr( shapes + '.ove', 1 ) for shapes in ctrlShapes ] # ove= override enable
 
-        ctrlShapes = mc.listRelatives( ctrlObject, s = 1) # s= shape
-        [ mc.setAttr( s + '.ove', 1 ) for s in ctrlShapes ] # ove= override enable
-
-        for s in ctrlShapes:
+        for ctrlShape in ctrlShapes:
             # print(s)
-            if len(s.split("L_")) == 2 or len(s.split("Left")) == 2 or len(s.split("l_")) == 2 or len(s.split("left")) == 2 :
-                mc.setAttr( s + '.ovc', 6)  #ovc= override color, 6 = blue
+            if len(ctrlShape.split("L_")) == 2 or len(ctrlShape.split("Left")) == 2 or len(ctrlShape.split("l_")) == 2 or len(ctrlShape.split("left")) == 2 :
+                mc.setAttr( ctrlShape + '.ovc', 6)   #ovc= override color, 6 = blue
                 # print("Blue")
-            elif len(s.split("R_")) == 2 or len(s.split("Right")) == 2 or len(s.split("r_")) == 2 or len(s.split("right")) == 2 :
-                mc.setAttr( s + '.ovc', 13)  #ovc= override color, 13 = red
+            elif len(ctrlShape.split("R_")) == 2 or len(ctrlShape.split("Right")) == 2 or len(ctrlShape.split("r_")) == 2 or len(ctrlShape.split("right")) == 2 :
+                mc.setAttr( ctrlShape + '.ovc', 13)  #ovc= override color, 13 = red
                 # print("Red")
             else :
-                mc.setAttr( s + '.ovc', 22)  #ovc= override color, 22 = yellow
+                mc.setAttr( ctrlShape + '.ovc', 22)  #ovc= override color, 22 = yellow
 
         # translate control
         if mc.objExists( translateTo ):
@@ -204,21 +181,18 @@ class ControlAutorig(QtWidgets.QDialog):
         for lockChannel in lockChannels:
             if lockChannel in ['t','r','s']:
                 for axis in ['x','y','z']:
-                    at = lockChannel + axis
-                    singleAttributeLockList.append(at)
+                    attribute = lockChannel + axis
+                    singleAttributeLockList.append(attribute)
             
             else:
-                singleAttributeLockList.append( lockChannel )
+                singleAttributeLockList.append(lockChannel)
             
-        for at in singleAttributeLockList:
-            mc.setAttr( ctrlObject + '.' + at, l = 1, k = 0) # l = lock, k = keyable
+        for attribute in singleAttributeLockList:
+            mc.setAttr( ctrlObject + '.' + attribute, lock = True, keyable = False) 
 
         return ctrlObject, ctrlOffset
 
-    def find_parent(self, jnt):
-        """
-        Find the parent of the current joint
-        """
+    def findParent(self, jnt):
         # this will identify the parent of the joint
         parents = mc.ls(jnt, long=True)[0].split('|')
         print(jnt, parents, len(parents))
@@ -228,30 +202,36 @@ class ControlAutorig(QtWidgets.QDialog):
         else:
             return parents[0]
 
-    def parent_constraint_control_to_jnt(self, ctrl_name, jnt):
-        """
-        Parent constraint controllers to respective joints
-        """
-        # print("parent_constraint_control_to_jnt")
-        mc.parentConstraint(ctrl_name, jnt, mo=True)
-
-    def controller_hierarchy(self, parent_of_jnt, ctrlOffsetName):
+    def controllerHierarchy(self, parent_of_jnt, ctrlOffsetName):
         if parent_of_jnt == '':
             pass
         else:
             print(parent_of_jnt)
             parent_of_jnt_prefix = parent_of_jnt.split(self.prefix)[-1]    
-            mc.parent(ctrlOffsetName, parent_of_jnt_prefix + '_ctrl')
+            mc.parent(ctrlOffsetName, parent_of_jnt_prefix + '_Ctrl')
+
+    def parentConstraintControlToJnt(self, ctrl_name, jnt):
+        mc.parentConstraint(ctrl_name, jnt, maintainOffset=True)
   
 #---------------------------------------------------------------------------------#
 #                 CALLING THE CONTROL AUTORIG TOOL
 #---------------------------------------------------------------------------------#
 if __name__ == "__main__":
-    
     try:
-        classVar.deleteLater()
-        classVar = None
-    except:
-        pass
-    
-    classVar = ControlAutorig()
+        import maya.cmds as mc
+        # Maya
+        path_ui = 'D:/ControlAutorig/04_ui/ui/ControlAutorig.ui'    # This path needs to be changed based on where the script is placed
+        try:
+            classVar.deleteLater()
+            classVar = None
+        except:
+            pass
+        
+        classVar = ControlAutorig()
+    except ImportError: 
+        # OS : Although this script won't function outside Maya. It is there just to see the UI.
+        import sys
+        app = QtWidgets.QApplication(sys.argv)
+        path_ui = ("/").join([os.path.dirname(__file__), "ui", "ControlAutorig.ui"])
+        classVarOS = ControlAutorig()
+        app.exec_()
