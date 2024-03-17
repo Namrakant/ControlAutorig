@@ -16,7 +16,7 @@
 import os
 # import maya.cmds as mc          # ModuleNotFoundError: No module named 'maya' if run on OS. Moved inside main call.
 
-from Qt.QtWidgets import QMessageBox
+from Qt.QtWidgets import QMessageBox, QFileDialog
 from Qt import QtWidgets, QtGui, QtCore, QtCompat
 
 #---------------------------------------------------------------------------------#
@@ -46,6 +46,30 @@ class ControlAutorig(QtWidgets.QDialog):
         self.wgUtil.btnUpperLegJoint.clicked.connect(self.hipJointMethod)
 
         self.wgUtil.btnCreateControls.clicked.connect(self.createControlsMethod)
+
+        self.wgUtil.btnSelectReferenceAnimation.clicked.connect(self.referenceAnimationMethod)
+
+        self.wgUtil.btnTransferAnimation.clicked.connect(self.transferAnimationMethod)
+
+    def referenceAnimationMethod(self):
+        filePath, fileType = QFileDialog.getOpenFileName(None, "Select File", "", "All Files (*.*)")
+        mc.file(filePath, reference=True, namespace="myNamespace")
+
+    def deleteReference(self):        
+        referencedFile = mc.file(query=True, reference=True)[0]
+        # Get the reference node of the referenced file
+        referenceNodes = mc.referenceQuery(referencedFile, referenceNode=True)
+        # # Remove the reference
+        mc.file(removeReference=True, referenceNode=referenceNodes)
+        print("Reference Deleted")
+
+    def transferAnimationMethod(self):
+        # transfer animation from joints to controls
+        print("Transfer animation is work in progress")
+
+        # Remove reference if checkbox is selected
+        if self.wgUtil.chkDeleteReference.isChecked() == True:
+            self.deleteReference()
 
     def identifyPrefixMethod(self):
         try:
