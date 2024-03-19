@@ -37,6 +37,7 @@ You have a character rig that has properly named joints skinned to the mesh but 
 - [x] Proper naming convention for controllers
 - [x] Good controller hierarchy
 - [x] Color-coded controllers
+- [x] Animation transfer from a mixamo rig to the controls
 
 ## **Features under progress...**
 - IK controls
@@ -44,7 +45,6 @@ You have a character rig that has properly named joints skinned to the mesh but 
 - Control color options
 - Control shape options
 - Control size manipulator
-- Animation transfer from a mixamo rig to the controls
 
 ## **LICENSE**
 Control Autorig is available under the MIT License. You can use it for commercial or non-commercial projects. Be sure to credit me in the project and documentation.
