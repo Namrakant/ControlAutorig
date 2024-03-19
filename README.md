@@ -1,6 +1,6 @@
 # Control Autorig
 The Control AutoRig tool is created for Autodesk Maya which simplifies the creation of FK and IK controls through an intuitive user interface. It streamlines the process of setting up controls, although it does not generate the joints themselves (that's a pre-requisite).
-![control autorig 1](https://github.com/Namrakant/ControlAutorig/assets/8972747/d954508c-adb3-4530-944b-9be77e40d167)
+![control autorig 3](https://github.com/Namrakant/ControlAutorig/assets/8972747/d3785ac6-70c7-4ed3-bb76-653a7dabaf18)
 
 ## **Pre-requisites**
 You have a character rig that has properly named joints skinned to the mesh but no controls. Example- [mixamo rigs](https://www.mixamo.com/#/)
